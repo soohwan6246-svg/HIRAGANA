@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>일본어 마스터</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; }
+    body { background: #f4f6fb; color: #1e293b; padding-bottom: 90px; user-select: none; }
+    header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 18px; font-weight: 800; color: #0f172a; }
+    header p { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+    .seg-control { display: grid; grid-template-columns: repeat(3, 1fr); background: #e2e8f0; padding: 4px; border-radius: 14px; margin-bottom: 14px; }
+    .seg-btn { border: none; background: transparent; padding: 9px 4px; font-size: 13px; font-weight: 700; color: #475569; border-radius: 10px; cursor: pointer; }
+    .seg-btn.active { background: #ffffff; color: #4f46e5; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .row-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
+    .row-scroll::-webkit-scrollbar { display: none; }
+    .chip { border: 1px solid #cbd5e1; background: #ffffff; color: #475569; padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .chip.active { background: #4f46e5; color: #ffffff; border-color: #4f46e5; }
+    .kana-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    @media (min-width: 500px) { .kana-grid { grid-template-columns: repeat(5, 1fr); } }
+    .kana-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 12px 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.1s; }
+    .kana-card:active { transform: scale(0.95); background: #f8fafc; }
+    .kana-row-tag { font-size: 10px; color: #94a3b8; font-weight: 700; margin-bottom: 4px; }
+    .kana-char { font-size: 36px; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 4px 0; }
+    .kana-pron { display: inline-block; background: #eef2ff; color: #4f46e5; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-top: 4px; }
+    .kana-word { font-size: 11px; color: #64748b; margin-top: 6px; word-break: keep-all; }
+    .quiz-box { background: #ffffff; border-radius: 24px; padding: 24px 16px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 16px; }
+    .quiz-badge { display: inline-block; background: #eef2ff; color: #4f46e5; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 999px; margin-bottom: 10px; }
+    .quiz-big-char { font-size: 84px; font-weight: 900; color: #0f172a; margin: 12px 0; cursor: pointer; }
+    .audio-btn { width: 88px; height: 88px; border-radius: 50%; background: #eef2ff; border: 2px solid #c7d2fe; font-size: 38px; cursor: pointer; margin: 14px auto; display: flex; align-items: center; justify-content: center; }
+    .opt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .opt-btn { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 18px 10px; font-size: 18px; font-weight: 800; color: #1e293b; cursor: pointer; }
+    .opt-btn.correct { background: #10b981; border-color: #059669; color: #ffffff; }
+    .opt-btn.wrong { background: #f43f5e; border-color: #e11d48; color: #ffffff; }
+    .feedback-bar { margin-top: 14px; background: #0f172a; color: #ffffff; padding: 14px 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .next-btn { background: #4f46e5; color: #ffffff; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; }
+    .phrase-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .phrase-jp { font-size: 18px; font-weight: 900; color: #4f46e5; }
+    .phrase-pron { font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 3px; }
+    .phrase-ko { font-size: 12px; color: #64748b; margin-top: 2px; }
+    nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px 12px 20px; z-index: 30; }
+    .nav-btn { border: none; background: transparent; display: flex; flex-direction: column; align-items: center; color: #94a3b8; font-size: 11px; font-weight: 700; gap: 3px; cursor: pointer; }
+    .nav-btn.active { color: #4f46e5; font-weight: 800; }
+    .hidden { display: none !important; }
+    .score-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; margin-bottom: 10px; padding: 0 4px; }
+</style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>🇯🇵 히라가나·가타카나 마스터</h1>
+        <p>터치하면 원어민 발음이 재생됩니다</p>
+    </div>
+</header>
+
+<div class="container">
+    <div id="tab-chart">
+        <div class="seg-control">
+            <button class="seg-btn active" id="m-hira" onclick="setMode('hira')">히라가나 (あ)</button>
+            <button class="seg-btn" id="m-kata" onclick="setMode('kata')">가타카나 (ア)</button>
+            <button class="seg-btn" id="m-both" onclick="setMode('both')">동시 비교</button>
+        </div>
+        <div class="row-scroll" id="chart-rows"></div>
+        <div class="kana-grid" id="kana-grid"></div>
+    </div>
+
+    <div id="tab-quiz" class="hidden">
+        <div class="seg-control">
+            <button class="seg-btn active" id="qm-hira" onclick="setQMode('hira')">히라가나</button>
+            <button class="seg-btn" id="qm-kata" onclick="setQMode('kata')">가타카나</button>
+            <button class="seg-btn" id="qm-audio" onclick="setQMode('audio')">🎧 듣기평가</button>
+        </div>
+        <p style="font-size:12px; color:#64748b; font-weight:700; margin-bottom:6px;">🎯 집중할 행 선택 (보기도 무조건 같은 행만 출제!)</p>
+        <div class="row-scroll" id="quiz-rows"></div>
+
+        <div class="score-row">
+            <span>⭐ 점수: <b id="q-score">0</b>점</span>
+            <span style="color:#e11d48;">🔥 연속 정답: <b id="q-streak">0</b>연속</span>
+        </div>
+
+        <div class="quiz-box">
+            <span class="quiz-badge" id="q-badge">아행 집중</span>
+            <p id="q-prompt" style="font-size:13px; color:#64748b; font-weight:700;">이 글자의 올바른 발음은?</p>
+            <div id="q-char" class="quiz-big-char" onclick="speakQuiz()">あ</div>
+            <div id="q-audio" class="hidden">
+                <button class="audio-btn" onclick="speakQuiz()">🔊</button>
+            </div>
+            <p style="font-size:11px; color:#4f46e5; font-weight:700;">💡 글자나 스피커를 누르면 소리가 나요</p>
+        </div>
+
+        <div class="opt-grid" id="q-options"></div>
+
+        <div id="q-feedback" class="feedback-bar hidden">
+            <div>
+                <div id="fb-title" style="font-weight:800; font-size:15px;">정답입니다! 🎉</div>
+                <div id="fb-sub" style="font-size:12px; color:#cbd5e1; margin-top:2px;"></div>
+            </div>
+            <button class="next-btn" onclick="nextQ()">다음 문제 ➔</button>
+        </div>
+    </div>
+
+    <div id="tab-phrase" class="hidden">
+        <div id="phrase-list"></div>
+    </div>
+</div>
+
+<nav>
+    <button class="nav-btn active" id="nav-chart" onclick="goTab('chart')">
+        <span style="font-size:20px;">📖</span><span>50음도 도감</span>
+    </button>
+    <button class="nav-btn" id="nav-quiz" onclick="goTab('quiz')">
+        <span style="font-size:20px;">🎮</span><span>실전 퀴즈</span>
+    </button>
+    <button class="nav-btn" id="nav-phrase" onclick="goTab('phrase')">
+        <span style="font-size:20px;">✈️</span><span>여행 회화</span>
+    </button>
+</nav>
+
+<script>
+const kanaData = [
+    { row:'아행', hira:'あ', kata:'ア', romaji:'a', ko:'아', word:'あさ (아침)' },
+    { row:'아행', hira:'い', kata:'イ', romaji:'i', ko:'이', word:'いぬ (개)' },
+    { row:'아행', hira:'う', kata:'ウ', romaji:'u', ko:'우', word:'うみ (바다)' },
+    { row:'아행', hira:'え', kata:'エ', romaji:'e', ko:'에', word:'えき (역)' },
+    { row:'아행', hira:'お', kata:'オ', romaji:'o', ko:'오', word:'おちゃ (차)' },
+    { row:'카행', hira:'か', kata:'カ', romaji:'ka', ko:'카', word:'かさ (우산)' },
+    { row:'카행', hira:'き', kata:'キ', romaji:'ki', ko:'키', word:'きっぷ (표)' },
+    { row:'카행', hira:'く', kata:'ク', romaji:'ku', ko:'쿠', word:'くつ (신발)' },
+    { row:'카행', hira:'け', kata:'ケ', romaji:'ke', ko:'케', word:'けいたい (휴대폰)' },
+    { row:'카행', hira:'こ', kata:'コ', romaji:'ko', ko:'코', word:'こーひー (커피)' },
+    { row:'사행', hira:'さ', kata:'サ', romaji:'sa', ko:'사', word:'さくら (벚꽃)' },
+    { row:'사행', hira:'し', kata:'シ', romaji:'shi', ko:'시', word:'しお (소금)' },
+    { row:'사행', hira:'す', kata:'ス', romaji:'su', ko:'스', word:'すし (초밥)' },
+    { row:'사행', hira:'せ', kata:'セ', romaji:'se', ko:'세', word:'せかい (세계)' },
+    { row:'사행', hira:'そ', kata:'ソ', romaji:'so', ko:'소', word:'そら (하늘)' },
+    { row:'타행', hira:'た', kata:'タ', romaji:'ta', ko:'타', word:'たまご (계란)' },
+    { row:'타행', hira:'ち', kata:'チ', romaji:'chi', ko:'치', word:'ちず (지도)' },
+    { row:'타행', hira:'つ', kata:'ツ', romaji:'tsu', ko:'츠', word:'つくえ (책상)' },
+    { row:'타행', hira:'て', kata:'テ', romaji:'te', ko:'테', word:'てがみ (편지)' },
+    { row:'타행', hira:'と', kata:'ト', romaji:'to', ko:'토', word:'とけい (시계)' },
+    { row:'나행', hira:'な', kata:'ナ', romaji:'na', ko:'나', word:'なつ (여름)' },
+    { row:'나행', hira:'に', kata:'ニ', romaji:'ni', ko:'니', word:'にく (고기)' },
+    { row:'나행', hira:'ぬ', kata:'ヌ', romaji:'nu', ko:'누', word:'ぬの (천)' },
+    { row:'나행', hira:'ね', kata:'ネ', romaji:'ne', ko:'네', word:'ねこ (고양이)' },
+    { row:'나행', hira:'の', kata:'ノ', romaji:'no', ko:'노', word:'のみもの (음료)' },
+    { row:'하행', hira:'は', kata:'ハ', romaji:'ha', ko:'하', word:'はな (꽃)' },
+    { row:'하행', hira:'ひ', kata:'ヒ', romaji:'hi', ko:'히', word:'ひこうき (비행기)' },
+    { row:'하행', hira:'ふ', kata:'フ', romaji:'fu', ko:'후', word:'ふゆ (겨울)' },
+    { row:'하행', hira:'へ', kata:'ヘ', romaji:'he', ko:'헤', word:'へや (방)' },
+    { row:'하행', hira:'ほ', kata:'ホ', romaji:'ho', ko:'호', word:'ほし (별)' },
+    { row:'마행', hira:'ま', kata:'マ', romaji:'ma', ko:'마', word:'まど (창문)' },
+    { row:'마행', hira:'み', kata:'ミ', romaji:'mi', ko:'미', word:'みず (물)' },
+    { row:'마행', hira:'む', kata:'ム', romaji:'mu', ko:'무', word:'むし (벌레)' },
+    { row:'마행', hira:'め', kata:'メ', romaji:'me', ko:'메', word:'めがね (안경)' },
+    { row:'마행', hira:'も', kata:'モ', romaji:'mo', ko:'모', word:'もも (복숭아)' },
+    { row:'야행', hira:'や', kata:'ヤ', romaji:'ya', ko:'야', word:'やま (산)' },
+    { row:'야행', hira:'ゆ', kata:'ユ', romaji:'yu', ko:'유', word:'ゆき (눈)' },
+    { row:'야행', hira:'よ', kata:'ヨ', romaji:'yo', ko:'요', word:'よる (밤)' },
+    { row:'라행', hira:'ら', kata:'ラ', romaji:'ra', ko:'라', word:'らーめん (라멘)' },
+    { row:'라행', hira:'り', kata:'リ', romaji:'ri', ko:'리', word:'りんご (사과)' },
+    { row:'라행', hira:'る', kata:'ル', romaji:'ru', ko:'루', word:'るす (부재중)' },
+    { row:'라행', hira:'れ', kata:'レ', romaji:'re', ko:'레', word:'れもん (레몬)' },
+    { row:'라행', hira:'ろ', kata:'ロ', romaji:'ro', ko:'로', word:'ろく (숫자 6)' },
+    { row:'와행', hira:'わ', kata:'ワ', romaji:'wa', ko:'와', word:'わたし (나)' },
+    { row:'와행', hira:'を', kata:'ヲ', romaji:'wo', ko:'오(조사)', word:'みずを (물을)' },
+    { row:'와행', hira:'ん', kata:'ン', romaji:'n', ko:'응/받침', word:'かばん (가방)' }
+];
+
+const phrases = [
+    { jp:'すみません', pron:'스미마셍', ko:'저기요 / 실례합니다' },
+    { jp:'これを ください', pron:'코레오 쿠다사이', ko:'이것을 주세요' },
+    { jp:'おみずを ください', pron:'오미즈오 쿠다사이', ko:'물 좀 주세요' },
+    { jp:'いくらですか', pron:'이쿠라데스카', ko:'얼마인가요?' },
+    { jp:'おかいけい おねがいします', pron:'오카이케- 오네가이시마스', ko:'계산 부탁합니다' },
+    { jp:'トイレは どこですか', pron:'토이레와 도코데스카', ko:'화장실은 어디인가요?' },
+    { jp:'ありがとうございます', pron:'아리가토- 고자이마스', ko:'감사합니다' }
+];
+
+const cRows = ['전체','아행','카행','사행','타행','나행','하행','마행','야행','라행','와행'];
+const qRows = ['아행','카행','사행','타행','나행','하행','마행','야행','라행','와행','전체'];
+
+let mode = 'hira', cRow = '전체', qMode = 'hira', qRow = '아행', curQ = null, score = 0, streak = 0, locked = false;
+
+function speak(txt) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = 'ja-JP';
+    u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+}
+
+function goTab(t) {
+    ['chart','quiz','phrase'].forEach(x => {
+        document.getElementById('tab-'+x).classList.toggle('hidden', x !== t);
+        document.getElementById('nav-'+x).classList.toggle('active', x === t);
+    });
+    if (t === 'quiz' && !curQ) nextQ();
+}
+
+function setMode(m) {
+    mode = m;
+    ['hira','kata','both'].forEach(x => document.getElementById('m-'+x).classList.toggle('active', x === m));
+    renderGrid();
+}
+
+function renderCRows() {
+    document.getElementById('chart-rows').innerHTML = cRows.map(r =>
+        `<button class="chip ${cRow===r?'active':''}" onclick="cRow='${r}';renderCRows();renderGrid();">${r}</button>`
+    ).join('');
+}
+
+function renderGrid() {
+    const list = cRow === '전체' ? kanaData : kanaData.filter(k => k.row === cRow);
+    document.getElementById('kana-grid').innerHTML = list.map(k => {
+        const ch = mode === 'hira' ? k.hira : (mode === 'kata' ? k.kata : `${k.hira}<span style="font-size:22px;color:#4f46e5;margin-left:4px;">${k.kata}</span>`);
+        return `<div class="kana-card" onclick="speak('${k.hira}')">
+            <div class="kana-row-tag">${k.row} 🔊</div>
+            <div class="kana-char">${ch}</div>
+            <div class="kana-pron">${k.ko} (${k.romaji})</div>
+            <div class="kana-word">${k.word}</div>
+        </div>`;
+    }).join('');
+}
+
+function setQMode(m) {
+    qMode = m;
+    ['hira','kata','audio'].forEach(x => document.getElementById('qm-'+x).classList.toggle('active', x === m));
+    nextQ();
+}
+
+function renderQRows() {
+    document.getElementById('quiz-rows').innerHTML = qRows.map(r =>
+        `<button class="chip ${qRow===r?'active':''}" onclick="qRow='${r}';renderQRows();nextQ();">${r}</button>`
+    ).join('');
+}
+
+function nextQ() {
+    locked = false;
+    document.getElementById('q-feedback').classList.add('hidden');
+    const pool = qRow === '전체' ? kanaData : kanaData.filter(k => k.row === qRow);
+    let next = pool[Math.floor(Math.random() * pool.length)];
+    if (pool.length > 1 && curQ) {
+        while (next.hira === curQ.hira) next = pool[Math.floor(Math.random() * pool.length)];
+    }
+    curQ = next;
+
+    const sameRow = kanaData.filter(k => k.row === curQ.row && k.hira !== curQ.hira).sort(() => Math.random() - 0.5);
+    const opts = [curQ, ...sameRow.slice(0, Math.min(3, sameRow.length))].sort(() => Math.random() - 0.5);
+
+    document.getElementById('q-badge').textContent = `${curQ.row} 보기 전용`;
+    const cBox = document.getElementById('q-char'), aBox = document.getElementById('q-audio');
+    if (qMode === 'audio') {
+        cBox.classList.add('hidden'); aBox.classList.remove('hidden');
+        setTimeout(() => speak(curQ.hira), 200);
+    } else {
+        cBox.classList.remove('hidden'); aBox.classList.add('hidden');
+        cBox.textContent = qMode === 'hira' ? curQ.hira : curQ.kata;
+    }
+
+    document.getElementById('q-options').innerHTML = opts.map(o => {
+        const lbl = qMode === 'audio' ? `${o.hira} / ${o.kata}` : `${o.ko} (${o.romaji})`;
+        return `<button class="opt-btn" data-h="${o.hira}" onclick="ans('${o.hira}', this)">${lbl}</button>`;
+    }).join('');
+}
+
+function speakQuiz() { if (curQ) speak(curQ.hira); }
+
+function ans(h, btn) {
+    if (locked) return;
+    locked = true;
+    speak(curQ.hira);
+    const ok = h === curQ.hira;
+    document.querySelectorAll('.opt-btn').forEach(b => {
+        if (b.getAttribute('data-h') === curQ.hira) b.classList.add('correct');
+        else if (b === btn && !ok) b.classList.add('wrong');
+    });
+    if (ok) { score += 10; streak++; document.getElementById('fb-title').textContent = '정답입니다! 🎉'; }
+    else { streak = 0; document.getElementById('fb-title').textContent = `오답! 정답은 '${curQ.ko}' 입니다.`; }
+    document.getElementById('q-score').textContent = score;
+    document.getElementById('q-streak').textContent = streak;
+    document.getElementById('fb-sub').textContent = `${curQ.hira}/${curQ.kata} (${curQ.ko}) · ${curQ.word}`;
+    document.getElementById('q-feedback').classList.remove('hidden');
+}
+
+function renderPhrases() {
+    document.getElementById('phrase-list').innerHTML = phrases.map(p =>
+        `<div class="phrase-card" onclick="speak('${p.jp}')">
+            <div><div class="phrase-jp">${p.jp}</div><div class="phrase-pron">${p.pron}</div><div class="phrase-ko">${p.ko}</div></div>
+            <div style="font-size:24px;">🔊</div>
+        </div>`
+    ).join('');
+}
+
+renderCRows(); renderGrid(); renderQRows(); renderPhrases(); nextQ();
+</script>
+</body>
+</html>
