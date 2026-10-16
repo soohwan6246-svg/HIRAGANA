@@ -1,301 +1,1171 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>일본어 마스터</title>
-<style>
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; }
-    body { background: #f4f6fb; color: #1e293b; padding-bottom: 90px; user-select: none; }
-    header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { font-size: 18px; font-weight: 800; color: #0f172a; }
-    header p { font-size: 12px; color: #64748b; margin-top: 2px; }
-    .container { max-width: 600px; margin: 0 auto; padding: 16px; }
-    .seg-control { display: grid; grid-template-columns: repeat(3, 1fr); background: #e2e8f0; padding: 4px; border-radius: 14px; margin-bottom: 14px; }
-    .seg-btn { border: none; background: transparent; padding: 9px 4px; font-size: 13px; font-weight: 700; color: #475569; border-radius: 10px; cursor: pointer; }
-    .seg-btn.active { background: #ffffff; color: #4f46e5; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-    .row-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
-    .row-scroll::-webkit-scrollbar { display: none; }
-    .chip { border: 1px solid #cbd5e1; background: #ffffff; color: #475569; padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
-    .chip.active { background: #4f46e5; color: #ffffff; border-color: #4f46e5; }
-    .kana-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    @media (min-width: 500px) { .kana-grid { grid-template-columns: repeat(5, 1fr); } }
-    .kana-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 12px 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.1s; }
-    .kana-card:active { transform: scale(0.95); background: #f8fafc; }
-    .kana-row-tag { font-size: 10px; color: #94a3b8; font-weight: 700; margin-bottom: 4px; }
-    .kana-char { font-size: 36px; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 4px 0; }
-    .kana-pron { display: inline-block; background: #eef2ff; color: #4f46e5; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-top: 4px; }
-    .kana-word { font-size: 11px; color: #64748b; margin-top: 6px; word-break: keep-all; }
-    .quiz-box { background: #ffffff; border-radius: 24px; padding: 24px 16px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); margin-bottom: 16px; }
-    .quiz-badge { display: inline-block; background: #eef2ff; color: #4f46e5; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 999px; margin-bottom: 10px; }
-    .quiz-big-char { font-size: 84px; font-weight: 900; color: #0f172a; margin: 12px 0; cursor: pointer; }
-    .audio-btn { width: 88px; height: 88px; border-radius: 50%; background: #eef2ff; border: 2px solid #c7d2fe; font-size: 38px; cursor: pointer; margin: 14px auto; display: flex; align-items: center; justify-content: center; }
-    .opt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .opt-btn { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 18px 10px; font-size: 18px; font-weight: 800; color: #1e293b; cursor: pointer; }
-    .opt-btn.correct { background: #10b981; border-color: #059669; color: #ffffff; }
-    .opt-btn.wrong { background: #f43f5e; border-color: #e11d48; color: #ffffff; }
-    .feedback-bar { margin-top: 14px; background: #0f172a; color: #ffffff; padding: 14px 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .next-btn { background: #4f46e5; color: #ffffff; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; }
-    .phrase-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .phrase-jp { font-size: 18px; font-weight: 900; color: #4f46e5; }
-    .phrase-pron { font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 3px; }
-    .phrase-ko { font-size: 12px; color: #64748b; margin-top: 2px; }
-    nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.96); border-top: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(3, 1fr); padding: 8px 12px 20px; z-index: 30; }
-    .nav-btn { border: none; background: transparent; display: flex; flex-direction: column; align-items: center; color: #94a3b8; font-size: 11px; font-weight: 700; gap: 3px; cursor: pointer; }
-    .nav-btn.active { color: #4f46e5; font-weight: 800; }
-    .hidden { display: none !important; }
-    .score-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; margin-bottom: 10px; padding: 0 4px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="일본어 마스터" />
+  <title>일본어 마스터 - 가나 10단계 정복 & 실전 회화</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234f46e5'/%3E%3Cstop offset='50%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%23ec4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='120' rx='28' fill='url(%23g)'/%3E%3Ccircle cx='92' cy='28' r='10' fill='%23fda4af' opacity='0.85'/%3E%3Ctext x='56' y='82' font-family='sans-serif' font-size='64' font-weight='900' fill='white' text-anchor='middle'%3Eあ%3C/text%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234f46e5'/%3E%3Cstop offset='50%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%23ec4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='120' rx='28' fill='url(%23g)'/%3E%3Ccircle cx='92' cy='28' r='10' fill='%23fda4af' opacity='0.85'/%3E%3Ctext x='56' y='82' font-family='sans-serif' font-size='64' font-weight='900' fill='white' text-anchor='middle'%3Eあ%3C/text%3E%3C/svg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;900&family=Pretendard:wght@400;600;700;800&display=swap');
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .jp-font {
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: popIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .blur-secret {
+      filter: blur(6px);
+      transition: filter 0.2s ease;
+    }
+    .blur-secret:hover, .blur-secret:active {
+      filter: blur(0px);
+    }
+    @keyframes pulseSoft {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.04); opacity: 0.85; }
+    }
+    .playing-pulse {
+      animation: pulseSoft 1.3s infinite ease-in-out;
+    }
+  </style>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-900 min-h-screen pb-32">
 
-<header>
-    <div>
-        <h1>🇯🇵 히라가나·가타카나 마스터</h1>
-        <p>터치하면 원어민 발음이 재생됩니다</p>
+  <!-- 상단 헤더 -->
+  <header class="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/80 px-4 py-3">
+    <div class="max-w-3xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-pink-500 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 shrink-0">
+          <svg class="w-6 h-6" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 9.5C11 7.5 21 7.5 27 9.5" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M7.5 13.5H24.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity="0.85"/>
+            <text x="14" y="25" fill="white" font-family="Noto Sans JP, sans-serif" font-weight="900" font-size="13" text-anchor="middle">あ</text>
+            <circle cx="24.5" cy="21.5" r="3.5" fill="#FDE047"/>
+          </svg>
+          <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white"></span>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-slate-800 leading-none">일본어 마스터</h1>
+            <span class="px-1.5 py-0.5 text-[10px] font-extrabold rounded-md bg-indigo-50 text-indigo-600 border border-indigo-100">PRO</span>
+          </div>
+          <p class="text-[11px] font-semibold text-slate-400 mt-0.5">10문제 마스터 자동 진급 & 실전 무한 반복 회화</p>
+        </div>
+      </div>
+
+      <!-- 우측 컨트롤: 음성 속도 조절 -->
+      <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <button id="speedSlowBtn" onclick="setSpeechRate(0.75)" class="px-2.5 py-1 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-sm transition">🐢 0.75x</button>
+        <button id="speedNormalBtn" onclick="setSpeechRate(1.0)" class="px-2.5 py-1 text-xs font-bold rounded-lg text-slate-600 transition">🐇 1.0x</button>
+      </div>
     </div>
-</header>
+  </header>
 
-<div class="container">
-    <div id="tab-chart">
-        <div class="seg-control">
-            <button class="seg-btn active" id="m-hira" onclick="setMode('hira')">히라가나 (あ)</button>
-            <button class="seg-btn" id="m-kata" onclick="setMode('kata')">가타카나 (ア)</button>
-            <button class="seg-btn" id="m-both" onclick="setMode('both')">동시 비교</button>
-        </div>
-        <div class="row-scroll" id="chart-rows"></div>
-        <div class="kana-grid" id="kana-grid"></div>
-    </div>
+  <!-- 메인 컨테이너 -->
+  <main class="max-w-3xl mx-auto p-4 md:p-6">
 
-    <div id="tab-quiz" class="hidden">
-        <div class="seg-control">
-            <button class="seg-btn active" id="qm-hira" onclick="setQMode('hira')">히라가나</button>
-            <button class="seg-btn" id="qm-kata" onclick="setQMode('kata')">가타카나</button>
-            <button class="seg-btn" id="qm-audio" onclick="setQMode('audio')">🎧 듣기평가</button>
-        </div>
-        <p style="font-size:12px; color:#64748b; font-weight:700; margin-bottom:6px;">🎯 집중할 행 선택 (보기도 무조건 같은 행만 출제!)</p>
-        <div class="row-scroll" id="quiz-rows"></div>
+    <!-- ========================================== -->
+    <!-- 1. 가나 퀴즈 섹션                          -->
+    <!-- ========================================== -->
+    <section id="tab-quiz" class="space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
+            <button id="modeHiraganaBtn" onclick="setScriptMode('hiragana')" class="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs sm:text-sm font-extrabold bg-white text-indigo-600 shadow-sm transition">히라가나 (あ)</button>
+            <button id="modeKatakanaBtn" onclick="setScriptMode('katakana')" class="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs sm:text-sm font-extrabold text-slate-600 transition">가타카나 (ア)</button>
+          </div>
 
-        <div class="score-row">
-            <span>⭐ 점수: <b id="q-score">0</b>점</span>
-            <span style="color:#e11d48;">🔥 연속 정답: <b id="q-streak">0</b>연속</span>
+          <div class="flex items-center gap-2 ml-auto text-xs font-bold">
+            <button id="toggleDakuonBtn" onclick="toggleIncludeDakuon()" class="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition">
+              + 탁음/반탁음 OFF
+            </button>
+            <span class="px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">총 정답 <strong id="scoreCorrect">0</strong></span>
+            <span class="px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">연속 🔥 <strong id="scoreStreak">0</strong></span>
+          </div>
         </div>
 
-        <div class="quiz-box">
-            <span class="quiz-badge" id="q-badge">아행 집중</span>
-            <p id="q-prompt" style="font-size:13px; color:#64748b; font-weight:700;">이 글자의 올바른 발음은?</p>
-            <div id="q-char" class="quiz-big-char" onclick="speakQuiz()">あ</div>
-            <div id="q-audio" class="hidden">
-                <button class="audio-btn" onclick="speakQuiz()">🔊</button>
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-500">출제 행 선택 <span class="text-indigo-600 font-extrabold">(10문제 맞히면 다음 행으로 자동 이동!)</span></span>
+            <button onclick="resetAllProgress()" class="text-[11px] font-semibold text-slate-400 hover:text-rose-500 transition">진도 초기화</button>
+          </div>
+          <div id="rowSelector" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/70">
+          <div class="flex items-center justify-between text-xs font-extrabold mb-1.5">
+            <span id="stageProgressTitle" class="text-slate-700 flex items-center gap-1.5">
+              🎯 <span id="currentRowNameLabel">아행</span> 마스터 미션
+            </span>
+            <span class="text-indigo-600"><strong id="rowStepCount">0</strong> / 10 문제 완료</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+            <div id="rowProgressBar" class="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3xl p-5 md:p-8 shadow-sm border border-slate-200/80 text-center relative overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <span id="quizRowBadge" class="px-3 py-1 rounded-full text-xs font-extrabold bg-indigo-50 text-indigo-600 border border-indigo-100">
+            아행 (あ행) 보기만 출제 중
+          </span>
+          <div class="flex items-center gap-1.5">
+            <button id="toggleDrawBtn" onclick="toggleDrawingPad()" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 transition">
+              ✍️ 손글씨 연습장
+            </button>
+          </div>
+        </div>
+
+        <div class="my-5 md:my-7 flex flex-col md:flex-row items-center justify-center gap-6">
+          <div class="flex flex-col items-center">
+            <div id="quizCharacter" class="jp-font text-8xl md:text-9xl font-black text-slate-800 tracking-tight select-none transition-transform duration-200">
+              あ
             </div>
-            <p style="font-size:11px; color:#4f46e5; font-weight:700;">💡 글자나 스피커를 누르면 소리가 나요</p>
-        </div>
+            <p id="quizSubHint" class="text-xs font-semibold text-slate-400 mt-2">글자를 보고 같은 행 보기 중에서 발음을 고르세요</p>
+          </div>
 
-        <div class="opt-grid" id="q-options"></div>
-
-        <div id="q-feedback" class="feedback-bar hidden">
-            <div>
-                <div id="fb-title" style="font-weight:800; font-size:15px;">정답입니다! 🎉</div>
-                <div id="fb-sub" style="font-size:12px; color:#cbd5e1; margin-top:2px;"></div>
+          <div id="drawingPadContainer" class="hidden flex-col items-center bg-slate-50 p-3 rounded-2xl border-2 border-dashed border-indigo-200">
+            <div class="flex items-center justify-between w-full mb-1.5 px-1">
+              <span class="text-[11px] font-bold text-indigo-600">✍️ 직접 써보기</span>
+              <button onclick="clearCanvas()" class="text-[11px] font-extrabold text-rose-500 hover:underline">지우기</button>
             </div>
-            <button class="next-btn" onclick="nextQ()">다음 문제 ➔</button>
+            <div class="relative w-36 h-36 bg-white rounded-xl border border-slate-200 overflow-hidden shadow-inner">
+              <div id="canvasGuideChar" class="jp-font absolute inset-0 flex items-center justify-center text-7xl font-black text-slate-200/70 pointer-events-none select-none">
+                あ
+              </div>
+              <canvas id="writeCanvas" width="144" height="144" class="relative z-10 w-full h-full touch-none cursor-crosshair"></canvas>
+            </div>
+          </div>
         </div>
+
+        <div class="flex justify-center mb-5">
+          <button onclick="speakCurrentQuestion()" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 active:scale-95 transition text-xs font-bold border border-slate-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+            발음 힌트 듣기 (정답 스포 주의!)
+          </button>
+        </div>
+
+        <div id="quizFeedback" class="min-h-[28px] text-sm sm:text-base font-extrabold mb-4 transition-all"></div>
+        <div id="quizOptions" class="grid grid-cols-1 sm:grid-cols-5 gap-2.5 max-w-2xl mx-auto"></div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-extrabold text-slate-800">📌 나의 오답 노트 (헷갈린 글자)</span>
+            <span id="weakCountBadge" class="px-2 py-0.5 text-xs font-extrabold rounded-full bg-rose-50 text-rose-600 border border-rose-200">0</span>
+          </div>
+          <button onclick="clearWeakNotes()" class="text-xs font-bold text-slate-400 hover:text-slate-600">비우기</button>
+        </div>
+        <div id="weakListContainer" class="flex flex-wrap gap-2"></div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 2. 50음도표 섹션                           -->
+    <!-- ========================================== -->
+    <section id="tab-chart" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="font-extrabold text-slate-800">50음도 & 탁음 한눈에 보기</h2>
+          <p class="text-xs text-slate-500 mt-0.5">각 글자를 터치하면 원어민 발음이 재생됩니다.</p>
+        </div>
+      </div>
+      <div id="kanaChartContainer" class="space-y-4"></div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 3. 일본어 실전 회화 섹션 (반복 듣기 집중 모드) -->
+    <!-- ========================================== -->
+    <section id="tab-phrases" class="hidden space-y-4">
+      
+      <!-- 상단 컨트롤러: 반복 설정 & 플레이어 제어 바 -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-3.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="font-extrabold text-slate-800 flex items-center gap-1.5">
+              <span>일본어 회화 무한 반복 트레이닝</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-600 text-white animate-pulse">LOOP</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">문장을 터치하거나 아래 컨트롤러로 귀가 뚫릴 때까지 반복해서 들어보세요.</p>
+          </div>
+
+          <!-- 가림막 토글 버튼 -->
+          <div class="flex items-center gap-1.5">
+            <button id="blindPronBtn" onclick="togglePhraseBlind('pron')" class="px-2.5 py-1.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 transition">
+              🙈 발음 가리기
+            </button>
+            <button id="blindKrBtn" onclick="togglePhraseBlind('kr')" class="px-2.5 py-1.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 transition">
+              🙈 뜻 가리기
+            </button>
+          </div>
+        </div>
+
+        <!-- 반복 모드 선택 바 -->
+        <div class="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-slate-100">
+          <div class="flex items-center gap-1 text-xs font-bold text-slate-600">
+            <span>🔁 반복 횟수:</span>
+            <div class="inline-flex bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+              <button id="repeatCount1" onclick="setPhraseRepeatCount(1)" class="px-2.5 py-1 rounded-lg text-xs font-extrabold text-slate-500 transition">1회</button>
+              <button id="repeatCount3" onclick="setPhraseRepeatCount(3)" class="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-white text-indigo-600 shadow-sm transition">3회 반복</button>
+              <button id="repeatCountInf" onclick="setPhraseRepeatCount('inf')" class="px-2.5 py-1 rounded-lg text-xs font-extrabold text-slate-500 transition">무한 반복 ∞</button>
+            </div>
+          </div>
+
+          <!-- 전체 순환 반복 재생 & 정지 버튼 -->
+          <div class="flex items-center gap-2">
+            <button id="autoPlayAllBtn" onclick="togglePlayAllPhrases()" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 transition flex items-center gap-1.5">
+              <span id="autoPlayIcon">▶️</span>
+              <span id="autoPlayText">이 카테고리 연속 재생</span>
+            </button>
+            <button onclick="stopAnyPhraseLoop()" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition">
+              ⏹️ 정지
+            </button>
+          </div>
+        </div>
+
+        <!-- 카테고리 필터 -->
+        <div id="phraseCategorySelector" class="flex gap-1.5 overflow-x-auto no-scrollbar pt-1"></div>
+      </div>
+
+      <!-- 현재 반복 재생 중인 상태 표시 플로팅 바 (재생 중일 때 노출) -->
+      <div id="nowPlayingBanner" class="hidden bg-gradient-to-r from-indigo-600 to-pink-600 rounded-2xl p-3.5 text-white shadow-md shadow-indigo-500/20 flex items-center justify-between gap-3 animate-pop">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0 playing-pulse">
+            🔊
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-black tracking-wide px-2 py-0.5 rounded-full bg-white/20">반복 재생 중</span>
+              <span id="playingCounterBadge" class="text-xs font-extrabold text-amber-200">1 / 3회</span>
+            </div>
+            <p id="nowPlayingJp" class="font-extrabold text-sm sm:text-base truncate jp-font mt-0.5"></p>
+          </div>
+        </div>
+        <button onclick="stopAnyPhraseLoop()" class="shrink-0 px-3 py-1.5 bg-white text-slate-800 rounded-xl font-black text-xs hover:bg-slate-100 active:scale-95 transition">
+          중단
+        </button>
+      </div>
+
+      <!-- 문장 카드 리스트 -->
+      <div id="phraseListContainer" class="space-y-3"></div>
+    </section>
+
+  </main>
+
+  <!-- 진급 축하 모달 -->
+  <div id="stageClearModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-indigo-100 animate-pop">
+      <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-indigo-600 to-pink-500 text-white flex items-center justify-center text-3xl shadow-lg shadow-indigo-500/30">
+        🎉
+      </div>
+      <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-600 border border-emerald-200">
+        10 / 10 정답 달성!
+      </span>
+      <h3 id="modalClearTitle" class="text-2xl font-black text-slate-800 mt-3">아행 완벽 마스터!</h3>
+      <p id="modalClearDesc" class="text-sm font-semibold text-slate-500 mt-1.5">
+        축하합니다! 이제 다음 단계로 넘어갑니다.
+      </p>
+
+      <div class="mt-6 flex flex-col gap-2">
+        <button id="modalNextRowBtn" onclick="advanceToNextRowNow()" class="w-full py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-extrabold text-sm shadow-md shadow-indigo-500/20 transition">
+          다음 행 바로 시작하기 →
+        </button>
+        <button onclick="stayInCurrentRow()" class="w-full py-2.5 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs transition">
+          이 행에서 더 연습하기
+        </button>
+      </div>
     </div>
+  </div>
 
-    <div id="tab-phrase" class="hidden">
-        <div id="phrase-list"></div>
+  <!-- 하단 고정 탭 네비게이션 -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-1.5">
+    <div class="max-w-md mx-auto grid grid-cols-3 gap-2">
+      <button id="nav-quiz" onclick="switchTab('quiz')" class="flex flex-col items-center py-1.5 rounded-xl text-indigo-600 font-extrabold transition">
+        <svg class="w-6 h-6 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="3" y="3" width="18" height="18" rx="5" />
+          <text x="12" y="16" fill="currentColor" stroke="none" font-family="Noto Sans JP, sans-serif" font-weight="900" font-size="11" text-anchor="middle">あ</text>
+        </svg>
+        <span class="text-[11px]">가나 퀴즈</span>
+      </button>
+
+      <button id="nav-chart" onclick="switchTab('chart')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-400 font-extrabold transition">
+        <svg class="w-6 h-6 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+        <span class="text-[11px]">50음도표</span>
+      </button>
+
+      <button id="nav-phrases" onclick="switchTab('phrases')" class="flex flex-col items-center py-1.5 rounded-xl text-slate-400 font-extrabold transition">
+        <svg class="w-6 h-6 mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 15.5V6.8C4 5.25 5.25 4 6.8 4h7.4C15.75 4 17 5.25 17 6.8v4.4c0 1.55-1.25 2.8-2.8 2.8H8l-4 2.5z" />
+          <path d="M10 17h4.5l3.5 2.2V17c1.1 0 2-.9 2-2V9.5c0-1.1-.9-2-2-2" />
+          <text x="10.5" y="11.2" fill="currentColor" stroke="none" font-family="Noto Sans JP, sans-serif" font-weight="900" font-size="6.8" text-anchor="middle">あ</text>
+        </svg>
+        <span class="text-[11px]">일본어 회화 (반복)</span>
+      </button>
     </div>
-</div>
+  </nav>
 
-<nav>
-    <button class="nav-btn active" id="nav-chart" onclick="goTab('chart')">
-        <span style="font-size:20px;">📖</span><span>50음도 도감</span>
-    </button>
-    <button class="nav-btn" id="nav-quiz" onclick="goTab('quiz')">
-        <span style="font-size:20px;">🎮</span><span>실전 퀴즈</span>
-    </button>
-    <button class="nav-btn" id="nav-phrase" onclick="goTab('phrase')">
-        <span style="font-size:20px;">✈️</span><span>여행 회화</span>
-    </button>
-</nav>
+  <script>
+    // =====================================================
+    // 1. 50음도 및 회화 원본 데이터
+    // =====================================================
+    const SEION_DATA = [
+      { rowId: "a", rowName: "아행", items: [{ h: "あ", k: "ア", r: "아", romaji: "a" }, { h: "い", k: "イ", r: "이", romaji: "i" }, { h: "う", k: "ウ", r: "우", romaji: "u" }, { h: "え", k: "エ", r: "에", romaji: "e" }, { h: "お", k: "オ", r: "오", romaji: "o" }] },
+      { rowId: "ka", rowName: "카행", items: [{ h: "か", k: "カ", r: "카", romaji: "ka" }, { h: "き", k: "キ", r: "키", romaji: "ki" }, { h: "く", k: "ク", r: "쿠", romaji: "ku" }, { h: "け", k: "ケ", r: "케", romaji: "ke" }, { h: "こ", k: "コ", r: "코", romaji: "ko" }] },
+      { rowId: "sa", rowName: "사행", items: [{ h: "さ", k: "サ", r: "사", romaji: "sa" }, { h: "し", k: "シ", r: "시", romaji: "shi" }, { h: "す", k: "ス", r: "스", romaji: "su" }, { h: "せ", k: "セ", r: "세", romaji: "se" }, { h: "そ", k: "ソ", r: "소", romaji: "so" }] },
+      { rowId: "ta", rowName: "타행", items: [{ h: "た", k: "タ", r: "타", romaji: "ta" }, { h: "ち", k: "チ", r: "치", romaji: "chi" }, { h: "つ", k: "ツ", r: "츠", romaji: "tsu" }, { h: "て", k: "テ", r: "테", romaji: "te" }, { h: "と", k: "ト", r: "토", romaji: "to" }] },
+      { rowId: "na", rowName: "나행", items: [{ h: "な", k: "ナ", r: "나", romaji: "na" }, { h: "に", k: "ニ", r: "니", romaji: "ni" }, { h: "ぬ", k: "ヌ", r: "누", romaji: "nu" }, { h: "ね", k: "ネ", r: "네", romaji: "ne" }, { h: "の", k: "ノ", r: "노", romaji: "no" }] },
+      { rowId: "ha", rowName: "하행", items: [{ h: "は", k: "ハ", r: "하", romaji: "ha" }, { h: "ひ", k: "ヒ", r: "히", romaji: "hi" }, { h: "ふ", k: "フ", r: "후", romaji: "fu" }, { h: "へ", k: "ヘ", r: "헤", romaji: "he" }, { h: "ほ", k: "ホ", r: "호", romaji: "ho" }] },
+      { rowId: "ma", rowName: "마행", items: [{ h: "ま", k: "マ", r: "마", romaji: "ma" }, { h: "み", k: "ミ", r: "미", romaji: "mi" }, { h: "む", k: "ム", r: "무", romaji: "mu" }, { h: "め", k: "메", r: "메", romaji: "me" }, { h: "も", k: "モ", r: "모", romaji: "mo" }] },
+      { rowId: "ya", rowName: "야행", items: [{ h: "や", k: "ヤ", r: "야", romaji: "ya" }, { h: "ゆ", k: "ユ", r: "유", romaji: "yu" }, { h: "よ", k: "ヨ", r: "요", romaji: "yo" }] },
+      { rowId: "ra", rowName: "라행", items: [{ h: "ら", k: "ラ", r: "라", romaji: "ra" }, { h: "り", k: "リ", r: "리", romaji: "ri" }, { h: "る", k: "ル", r: "루", romaji: "ru" }, { h: "れ", k: "レ", r: "레", romaji: "re" }, { h: "ろ", k: "ロ", r: "로", romaji: "ro" }] },
+      { rowId: "wa", rowName: "와행", items: [{ h: "わ", k: "ワ", r: "와", romaji: "wa" }, { h: "を", k: "ヲ", r: "오(조사)", romaji: "wo" }, { h: "ん", k: "ン", r: "응(받침)", romaji: "n" }] }
+    ];
 
-<script>
-const kanaData = [
-    { row:'아행', hira:'あ', kata:'ア', romaji:'a', ko:'아', word:'あさ (아침)' },
-    { row:'아행', hira:'い', kata:'イ', romaji:'i', ko:'이', word:'いぬ (개)' },
-    { row:'아행', hira:'う', kata:'ウ', romaji:'u', ko:'우', word:'うみ (바다)' },
-    { row:'아행', hira:'え', kata:'エ', romaji:'e', ko:'에', word:'えき (역)' },
-    { row:'아행', hira:'お', kata:'オ', romaji:'o', ko:'오', word:'おちゃ (차)' },
-    { row:'카행', hira:'か', kata:'カ', romaji:'ka', ko:'카', word:'かさ (우산)' },
-    { row:'카행', hira:'き', kata:'キ', romaji:'ki', ko:'키', word:'きっぷ (표)' },
-    { row:'카행', hira:'く', kata:'ク', romaji:'ku', ko:'쿠', word:'くつ (신발)' },
-    { row:'카행', hira:'け', kata:'ケ', romaji:'ke', ko:'케', word:'けいたい (휴대폰)' },
-    { row:'카행', hira:'こ', kata:'コ', romaji:'ko', ko:'코', word:'こーひー (커피)' },
-    { row:'사행', hira:'さ', kata:'サ', romaji:'sa', ko:'사', word:'さくら (벚꽃)' },
-    { row:'사행', hira:'し', kata:'シ', romaji:'shi', ko:'시', word:'しお (소금)' },
-    { row:'사행', hira:'す', kata:'ス', romaji:'su', ko:'스', word:'すし (초밥)' },
-    { row:'사행', hira:'せ', kata:'セ', romaji:'se', ko:'세', word:'せかい (세계)' },
-    { row:'사행', hira:'そ', kata:'ソ', romaji:'so', ko:'소', word:'そら (하늘)' },
-    { row:'타행', hira:'た', kata:'タ', romaji:'ta', ko:'타', word:'たまご (계란)' },
-    { row:'타행', hira:'ち', kata:'チ', romaji:'chi', ko:'치', word:'ちず (지도)' },
-    { row:'타행', hira:'つ', kata:'ツ', romaji:'tsu', ko:'츠', word:'つくえ (책상)' },
-    { row:'타행', hira:'て', kata:'テ', romaji:'te', ko:'테', word:'てがみ (편지)' },
-    { row:'타행', hira:'と', kata:'ト', romaji:'to', ko:'토', word:'とけい (시계)' },
-    { row:'나행', hira:'な', kata:'ナ', romaji:'na', ko:'나', word:'なつ (여름)' },
-    { row:'나행', hira:'に', kata:'ニ', romaji:'ni', ko:'니', word:'にく (고기)' },
-    { row:'나행', hira:'ぬ', kata:'ヌ', romaji:'nu', ko:'누', word:'ぬの (천)' },
-    { row:'나행', hira:'ね', kata:'ネ', romaji:'ne', ko:'네', word:'ねこ (고양이)' },
-    { row:'나행', hira:'の', kata:'ノ', romaji:'no', ko:'노', word:'のみもの (음료)' },
-    { row:'하행', hira:'は', kata:'ハ', romaji:'ha', ko:'하', word:'はな (꽃)' },
-    { row:'하행', hira:'ひ', kata:'ヒ', romaji:'hi', ko:'히', word:'ひこうき (비행기)' },
-    { row:'하행', hira:'ふ', kata:'フ', romaji:'fu', ko:'후', word:'ふゆ (겨울)' },
-    { row:'하행', hira:'へ', kata:'ヘ', romaji:'he', ko:'헤', word:'へや (방)' },
-    { row:'하행', hira:'ほ', kata:'ホ', romaji:'ho', ko:'호', word:'ほし (별)' },
-    { row:'마행', hira:'ま', kata:'マ', romaji:'ma', ko:'마', word:'まど (창문)' },
-    { row:'마행', hira:'み', kata:'ミ', romaji:'mi', ko:'미', word:'みず (물)' },
-    { row:'마행', hira:'む', kata:'ム', romaji:'mu', ko:'무', word:'むし (벌레)' },
-    { row:'마행', hira:'め', kata:'メ', romaji:'me', ko:'메', word:'めがね (안경)' },
-    { row:'마행', hira:'も', kata:'モ', romaji:'mo', ko:'모', word:'もも (복숭아)' },
-    { row:'야행', hira:'や', kata:'ヤ', romaji:'ya', ko:'야', word:'やま (산)' },
-    { row:'야행', hira:'ゆ', kata:'ユ', romaji:'yu', ko:'유', word:'ゆき (눈)' },
-    { row:'야행', hira:'よ', kata:'ヨ', romaji:'yo', ko:'요', word:'よる (밤)' },
-    { row:'라행', hira:'ら', kata:'ラ', romaji:'ra', ko:'라', word:'らーめん (라멘)' },
-    { row:'라행', hira:'り', kata:'リ', romaji:'ri', ko:'리', word:'りんご (사과)' },
-    { row:'라행', hira:'る', kata:'ル', romaji:'ru', ko:'루', word:'るす (부재중)' },
-    { row:'라행', hira:'れ', kata:'レ', romaji:'re', ko:'레', word:'れもん (레몬)' },
-    { row:'라행', hira:'ろ', kata:'ロ', romaji:'ro', ko:'로', word:'ろく (숫자 6)' },
-    { row:'와행', hira:'わ', kata:'ワ', romaji:'wa', ko:'와', word:'わたし (나)' },
-    { row:'와행', hira:'を', kata:'ヲ', romaji:'wo', ko:'오(조사)', word:'みずを (물을)' },
-    { row:'와행', hira:'ん', kata:'ン', romaji:'n', ko:'응/받침', word:'かばん (가방)' }
-];
+    const DAKUON_DATA = [
+      { rowId: "ga", rowName: "가행(탁음)", items: [{ h: "が", k: "ガ", r: "가", romaji: "ga" }, { h: "ぎ", k: "ギ", r: "기", romaji: "gi" }, { h: "ぐ", k: "グ", r: "구", romaji: "gu" }, { h: "げ", k: "ゲ", r: "게", romaji: "ge" }, { h: "ご", k: "ゴ", r: "고", romaji: "go" }] },
+      { rowId: "za", rowName: "자행(탁음)", items: [{ h: "ざ", k: "ザ", r: "자", romaji: "za" }, { h: "じ", k: "ジ", r: "지", romaji: "ji" }, { h: "ず", k: "ズ", r: "즈", romaji: "zu" }, { h: "ぜ", k: "ゼ", r: "제", romaji: "ze" }, { h: "ぞ", k: "ゾ", r: "조", romaji: "zo" }] },
+      { rowId: "da", rowName: "다행(탁음)", items: [{ h: "だ", k: "ダ", r: "다", romaji: "da" }, { h: "ぢ", k: "ヂ", r: "지(ぢ)", romaji: "di" }, { h: "づ", k: "ヅ", r: "즈(づ)", romaji: "du" }, { h: "で", k: "デ", r: "데", romaji: "de" }, { h: "ど", k: "ド", r: "도", romaji: "do" }] },
+      { rowId: "ba", rowName: "바행(탁음)", items: [{ h: "ば", k: "バ", r: "바", romaji: "ba" }, { h: "び", k: "ビ", r: "비", romaji: "bi" }, { h: "ぶ", k: "ブ", r: "부", romaji: "bu" }, { h: "べ", k: "ベ", r: "베", romaji: "be" }, { h: "ぼ", k: "ボ", r: "보", romaji: "bo" }] },
+      { rowId: "pa", rowName: "파행(반탁음)", items: [{ h: "ぱ", k: "パ", r: "파", romaji: "pa" }, { h: "ぴ", k: "ピ", r: "피", romaji: "pi" }, { h: "ぷ", k: "プ", r: "푸", romaji: "pu" }, { h: "ぺ", k: "ペ", r: "페", romaji: "pe" }, { h: "ぽ", k: "ポ", r: "포", romaji: "po" }] }
+    ];
 
-const phrases = [
-    { jp:'すみません', pron:'스미마셍', ko:'저기요 / 실례합니다' },
-    { jp:'これを ください', pron:'코레오 쿠다사이', ko:'이것을 주세요' },
-    { jp:'おみずを ください', pron:'오미즈오 쿠다사이', ko:'물 좀 주세요' },
-    { jp:'いくらですか', pron:'이쿠라데스카', ko:'얼마인가요?' },
-    { jp:'おかいけい おねがいします', pron:'오카이케- 오네가이시마스', ko:'계산 부탁합니다' },
-    { jp:'トイレは どこですか', pron:'토이레와 도코데스카', ko:'화장실은 어디인가요?' },
-    { jp:'ありがとうございます', pron:'아리가토- 고자이마스', ko:'감사합니다' }
-];
+    const PHRASE_DATA = [
+      { id: "p1", category: "기본/인사", jp: "おはようございます。", pron: "오하요- 고자이마스", kr: "안녕하세요 (아침 인사)" },
+      { id: "p2", category: "기본/인사", jp: "こんにちは。", pron: "곤니치와", kr: "안녕하세요 (낮 인사)" },
+      { id: "p3", category: "기본/인사", jp: "ありがとうございます。", pron: "아리가토- 고자이마스", kr: "감사합니다." },
+      { id: "p4", category: "기본/인사", jp: "すみません。", pron: "스미마셍", kr: "실례합니다 / 저기요 / 죄송합니다." },
+      { id: "p5", category: "기본/인사", jp: "大丈夫です。", pron: "다이죠-부데스", kr: "괜찮습니다." },
+      { id: "p6", category: "식당/카페", jp: "すみません、注文お願いします。", pron: "스미마셍, 츄-몬 오네가이시마스", kr: "저기요, 주문 부탁합니다." },
+      { id: "p7", category: "식당/카페", jp: "お水をお願いします。", pron: "오미즈오 오네가이시마스", kr: "물 좀 부탁드립니다." },
+      { id: "p8", category: "식당/카페", jp: "おすすめは何ですか？", pron: "오스스메와 난데스카?", kr: "추천 메뉴는 무엇인가요?" },
+      { id: "p9", category: "식당/카페", jp: "韓国語のメニューはありますか？", pron: "칸코쿠고노 메뉴-와 아리마스카?", kr: "한국어 메뉴판이 있나요?" },
+      { id: "p10", category: "식당/카페", jp: "お会計をお願いします。", pron: "오카이케-오 오네가이시마스", kr: "계산 부탁합니다." },
+      { id: "p11", category: "쇼핑/결제", jp: "これはいくらですか？", pron: "코레와 이쿠라데스카?", kr: "이것은 얼마인가요?" },
+      { id: "p12", category: "쇼핑/결제", jp: "カードで払えますか？", pron: "카-도데 하라에마스카?", kr: "카드로 결제할 수 있나요?" },
+      { id: "p13", category: "쇼핑/결제", jp: "免税できますか？", pron: "멘제- 데키마스카?", kr: "면세 가능한가요?" },
+      { id: "p14", category: "쇼핑/결제", jp: "袋はいりません。", pron: "후쿠로와 이리마셍", kr: "봉투는 필요 없습니다." },
+      { id: "p15", category: "교통/길찾기", jp: "トイレはどこですか？", pron: "토이레와 도코데스카?", kr: "화장실은 어디인가요?" },
+      { id: "p16", category: "교통/길찾기", jp: "駅はどこですか？", pron: "에키와 도코데스카?", kr: "역은 어디에 있나요?" },
+      { id: "p17", category: "교통/길찾기", jp: "ここまで行ってください。", pron: "코코마데 잇테 쿠다사이", kr: "여기까지 가 주세요." },
+      { id: "p18", category: "숙소/호텔", jp: "チェックインをお願いします。", pron: "첵쿠인오 오네가이시마스", kr: "체크인 부탁합니다." },
+      { id: "p19", category: "숙소/호텔", jp: "荷物を預かってもらえますか？", pron: "니모츠오 아즈캇테 모라에마스카?", kr: "짐을 맡아 주실 수 있나요?" },
+      { id: "p20", category: "숙소/호텔", jp: "Wi-Fiのパスワードは何ですか？", pron: "와이파이노 파스와-도와 난데스카?", kr: "와이파이 비밀번호가 무엇인가요?" }
+    ];
 
-const cRows = ['전체','아행','카행','사행','타행','나행','하행','마행','야행','라행','와행'];
-const qRows = ['아행','카행','사행','타행','나행','하행','마행','야행','라행','와행','전체'];
+    // =====================================================
+    // 2. 상태 관리
+    // =====================================================
+    const TARGET_QUESTIONS_PER_ROW = 10;
+    let includeDakuon = false;
+    let currentScript = "hiragana";
+    let selectedRowId = "a";
+    let currentQuestion = null;
+    let currentRowObj = null;
+    let scoreCorrect = 0;
+    let scoreStreak = 0;
+    let rowCorrectCount = 0;
+    let speechRate = 0.75;
+    let isLocked = false;
+    let nextRowIdToAdvance = null;
 
-let mode = 'hira', cRow = '전체', qMode = 'hira', qRow = '아행', curQ = null, score = 0, streak = 0, locked = false;
+    let clearedRows = JSON.parse(localStorage.getItem("jp_cleared_rows") || "[]");
+    let weakChars = JSON.parse(localStorage.getItem("jp_weak_chars") || "[]");
+    let favPhrases = JSON.parse(localStorage.getItem("jp_fav_phrases") || "[]");
 
-function speak(txt) {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(txt);
-    u.lang = 'ja-JP';
-    u.rate = 0.85;
-    window.speechSynthesis.speak(u);
-}
+    // 회화 탭 및 반복 재생 상태 변수
+    let selectedPhraseCategory = "전체";
+    let blindPron = false;
+    let blindKr = false;
+    let phraseRepeatSetting = 3;     // 1, 3, or 'inf'
+    let currentLoopItem = null;      // 현재 반복 중인 문장 객체
+    let currentLoopCount = 0;       // 현재 반복 횟수
+    let loopTimeoutId = null;        // 반복 타이머
+    let isAutoPlayingAll = false;    // 카테고리 전체 연속 반복 모드 여부
+    let autoPlayIndex = 0;
 
-function goTab(t) {
-    ['chart','quiz','phrase'].forEach(x => {
-        document.getElementById('tab-'+x).classList.toggle('hidden', x !== t);
-        document.getElementById('nav-'+x).classList.toggle('active', x === t);
-    });
-    if (t === 'quiz' && !curQ) nextQ();
-}
-
-function setMode(m) {
-    mode = m;
-    ['hira','kata','both'].forEach(x => document.getElementById('m-'+x).classList.toggle('active', x === m));
-    renderGrid();
-}
-
-function renderCRows() {
-    document.getElementById('chart-rows').innerHTML = cRows.map(r =>
-        `<button class="chip ${cRow===r?'active':''}" onclick="cRow='${r}';renderCRows();renderGrid();">${r}</button>`
-    ).join('');
-}
-
-function renderGrid() {
-    const list = cRow === '전체' ? kanaData : kanaData.filter(k => k.row === cRow);
-    document.getElementById('kana-grid').innerHTML = list.map(k => {
-        const ch = mode === 'hira' ? k.hira : (mode === 'kata' ? k.kata : `${k.hira}<span style="font-size:22px;color:#4f46e5;margin-left:4px;">${k.kata}</span>`);
-        return `<div class="kana-card" onclick="speak('${k.hira}')">
-            <div class="kana-row-tag">${k.row} 🔊</div>
-            <div class="kana-char">${ch}</div>
-            <div class="kana-pron">${k.ko} (${k.romaji})</div>
-            <div class="kana-word">${k.word}</div>
-        </div>`;
-    }).join('');
-}
-
-function setQMode(m) {
-    qMode = m;
-    ['hira','kata','audio'].forEach(x => document.getElementById('qm-'+x).classList.toggle('active', x === m));
-    nextQ();
-}
-
-function renderQRows() {
-    document.getElementById('quiz-rows').innerHTML = qRows.map(r =>
-        `<button class="chip ${qRow===r?'active':''}" onclick="qRow='${r}';renderQRows();nextQ();">${r}</button>`
-    ).join('');
-}
-
-function nextQ() {
-    locked = false;
-    document.getElementById('q-feedback').classList.add('hidden');
-    const pool = qRow === '전체' ? kanaData : kanaData.filter(k => k.row === qRow);
-    let next = pool[Math.floor(Math.random() * pool.length)];
-    if (pool.length > 1 && curQ) {
-        while (next.hira === curQ.hira) next = pool[Math.floor(Math.random() * pool.length)];
-    }
-    curQ = next;
-
-    const sameRow = kanaData.filter(k => k.row === curQ.row && k.hira !== curQ.hira).sort(() => Math.random() - 0.5);
-    const opts = [curQ, ...sameRow.slice(0, Math.min(3, sameRow.length))].sort(() => Math.random() - 0.5);
-
-    document.getElementById('q-badge').textContent = `${curQ.row} 보기 전용`;
-    const cBox = document.getElementById('q-char'), aBox = document.getElementById('q-audio');
-    if (qMode === 'audio') {
-        cBox.classList.add('hidden'); aBox.classList.remove('hidden');
-        setTimeout(() => speak(curQ.hira), 200);
-    } else {
-        cBox.classList.remove('hidden'); aBox.classList.add('hidden');
-        cBox.textContent = qMode === 'hira' ? curQ.hira : curQ.kata;
+    function getActiveKanaList() {
+      return includeDakuon ? [...SEION_DATA, ...DAKUON_DATA] : SEION_DATA;
     }
 
-    document.getElementById('q-options').innerHTML = opts.map(o => {
-        const lbl = qMode === 'audio' ? `${o.hira} / ${o.kata}` : `${o.ko} (${o.romaji})`;
-        return `<button class="opt-btn" data-h="${o.hira}" onclick="ans('${o.hira}', this)">${lbl}</button>`;
-    }).join('');
-}
+    // =====================================================
+    // 3. Web Speech API 음성 재생 및 비동기 완료 Promise
+    // =====================================================
+    function speakJapaneseAsync(text) {
+      return new Promise((resolve) => {
+        if (!("speechSynthesis" in window)) {
+          resolve();
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "ja-JP";
+        utter.rate = speechRate;
 
-function speakQuiz() { if (curQ) speak(curQ.hira); }
+        const voices = window.speechSynthesis.getVoices();
+        const jpVoice = voices.find(v => v.lang.includes("ja") || v.lang.includes("JP"));
+        if (jpVoice) utter.voice = jpVoice;
 
-function ans(h, btn) {
-    if (locked) return;
-    locked = true;
-    speak(curQ.hira);
-    const ok = h === curQ.hira;
-    document.querySelectorAll('.opt-btn').forEach(b => {
-        if (b.getAttribute('data-h') === curQ.hira) b.classList.add('correct');
-        else if (b === btn && !ok) b.classList.add('wrong');
+        utter.onend = () => {
+          resolve();
+        };
+        utter.onerror = () => {
+          resolve();
+        };
+
+        window.speechSynthesis.speak(utter);
+      });
+    }
+
+    function speakJapanese(text) {
+      speakJapaneseAsync(text);
+    }
+
+    function setSpeechRate(rate) {
+      speechRate = rate;
+      const slowBtn = document.getElementById("speedSlowBtn");
+      const normalBtn = document.getElementById("speedNormalBtn");
+      if (rate === 0.75) {
+        slowBtn.className = "px-2.5 py-1 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-sm transition";
+        normalBtn.className = "px-2.5 py-1 text-xs font-bold rounded-lg text-slate-600 transition";
+      } else {
+        normalBtn.className = "px-2.5 py-1 text-xs font-bold rounded-lg bg-white text-indigo-600 shadow-sm transition";
+        slowBtn.className = "px-2.5 py-1 text-xs font-bold rounded-lg text-slate-600 transition";
+      }
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // =====================================================
+    // 4. 일본어 회화 반복(Loop) 재생 엔진
+    // =====================================================
+    function setPhraseRepeatCount(count) {
+      phraseRepeatSetting = count;
+      [1, 3, 'inf'].forEach(val => {
+        const btn = document.getElementById(val === 'inf' ? 'repeatCountInf' : `repeatCount${val}`);
+        if (!btn) return;
+        if (phraseRepeatSetting === val) {
+          btn.className = "px-2.5 py-1 rounded-lg text-xs font-extrabold bg-white text-indigo-600 shadow-sm transition";
+        } else {
+          btn.className = "px-2.5 py-1 rounded-lg text-xs font-extrabold text-slate-500 transition";
+        }
+      });
+    }
+
+    // 문장 단독 반복 실행 함수
+    async function playPhraseLoop(item) {
+      // 이미 같은 문장을 반복 중이라면 토글하여 멈춤
+      if (currentLoopItem && currentLoopItem.id === item.id && !isAutoPlayingAll) {
+        stopAnyPhraseLoop();
+        return;
+      }
+
+      stopAnyPhraseLoop();
+      currentLoopItem = item;
+      currentLoopCount = 0;
+      isAutoPlayingAll = false;
+      updatePlayAllButtonUI();
+      showNowPlayingBanner(item);
+      renderPhrases();
+
+      await runLoopCycle();
+    }
+
+    async function runLoopCycle() {
+      if (!currentLoopItem) return;
+
+      currentLoopCount++;
+      updateBannerCounter();
+
+      await speakJapaneseAsync(currentLoopItem.jp);
+
+      // 사용자가 중간에 멈췄는지 체크
+      if (!currentLoopItem) return;
+
+      const isInfinite = phraseRepeatSetting === 'inf';
+      const targetCount = isInfinite ? Infinity : phraseRepeatSetting;
+
+      if (currentLoopCount < targetCount) {
+        // 문장과 문장 사이 0.8초의 자연스러운 간격 후 다음 반복 실행
+        loopTimeoutId = setTimeout(() => {
+          runLoopCycle();
+        }, 800);
+      } else {
+        // 단독 문장 반복 완료 시
+        if (isAutoPlayingAll) {
+          advanceToNextInPlaylist();
+        } else {
+          stopAnyPhraseLoop();
+        }
+      }
+    }
+
+    // 현재 카테고리 전체 연속 반복 재생
+    function togglePlayAllPhrases() {
+      if (isAutoPlayingAll) {
+        stopAnyPhraseLoop();
+        return;
+      }
+
+      const list = getFilteredPhrases();
+      if (list.length === 0) {
+        alert("재생할 문장이 없습니다.");
+        return;
+      }
+
+      stopAnyPhraseLoop();
+      isAutoPlayingAll = true;
+      autoPlayIndex = 0;
+      updatePlayAllButtonUI();
+      playCurrentPlaylistIndex();
+    }
+
+    function playCurrentPlaylistIndex() {
+      const list = getFilteredPhrases();
+      if (autoPlayIndex >= list.length) {
+        autoPlayIndex = 0; // 목록 끝에 도달하면 처음부터 다시 무한 순환!
+      }
+      currentLoopItem = list[autoPlayIndex];
+      currentLoopCount = 0;
+      showNowPlayingBanner(currentLoopItem);
+      renderPhrases();
+      runLoopCycle();
+    }
+
+    function advanceToNextInPlaylist() {
+      if (!isAutoPlayingAll) return;
+      autoPlayIndex++;
+      playCurrentPlaylistIndex();
+    }
+
+    function stopAnyPhraseLoop() {
+      if (loopTimeoutId) {
+        clearTimeout(loopTimeoutId);
+        loopTimeoutId = null;
+      }
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      currentLoopItem = null;
+      currentLoopCount = 0;
+      isAutoPlayingAll = false;
+
+      updatePlayAllButtonUI();
+      hideNowPlayingBanner();
+      renderPhrases();
+    }
+
+    function showNowPlayingBanner(item) {
+      const banner = document.getElementById("nowPlayingBanner");
+      const jpText = document.getElementById("nowPlayingJp");
+      jpText.textContent = `${item.jp} (${item.kr})`;
+      banner.classList.remove("hidden");
+    }
+
+    function updateBannerCounter() {
+      const badge = document.getElementById("playingCounterBadge");
+      if (!badge) return;
+      if (phraseRepeatSetting === 'inf') {
+        badge.textContent = `${currentLoopCount}회째 반복 중 ∞`;
+      } else {
+        badge.textContent = `${currentLoopCount} / ${phraseRepeatSetting}회 반복`;
+      }
+    }
+
+    function hideNowPlayingBanner() {
+      const banner = document.getElementById("nowPlayingBanner");
+      banner.classList.add("hidden");
+    }
+
+    function updatePlayAllButtonUI() {
+      const icon = document.getElementById("autoPlayIcon");
+      const text = document.getElementById("autoPlayText");
+      const btn = document.getElementById("autoPlayAllBtn");
+      if (isAutoPlayingAll) {
+        icon.textContent = "⏸️";
+        text.textContent = "연속 재생 일시정지";
+        btn.className = "px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white border border-indigo-600 transition flex items-center gap-1.5";
+      } else {
+        icon.textContent = "▶️";
+        text.textContent = "이 카테고리 연속 재생";
+        btn.className = "px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 transition flex items-center gap-1.5";
+      }
+    }
+
+    function getFilteredPhrases() {
+      if (selectedPhraseCategory === "⭐ 즐겨찾기") {
+        return PHRASE_DATA.filter(p => favPhrases.includes(p.id));
+      } else if (selectedPhraseCategory !== "전체") {
+        return PHRASE_DATA.filter(p => p.category === selectedPhraseCategory);
+      }
+      return PHRASE_DATA;
+    }
+
+    function togglePhraseBlind(type) {
+      if (type === "pron") {
+        blindPron = !blindPron;
+        const btn = document.getElementById("blindPronBtn");
+        btn.className = blindPron
+          ? "px-2.5 py-1.5 rounded-xl text-xs font-bold border border-indigo-600 bg-indigo-600 text-white transition"
+          : "px-2.5 py-1.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 transition";
+      } else {
+        blindKr = !blindKr;
+        const btn = document.getElementById("blindKrBtn");
+        btn.className = blindKr
+          ? "px-2.5 py-1.5 rounded-xl text-xs font-bold border border-indigo-600 bg-indigo-600 text-white transition"
+          : "px-2.5 py-1.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 transition";
+      }
+      renderPhrases();
+    }
+
+    function toggleFavPhrase(e, id) {
+      e.stopPropagation();
+      if (favPhrases.includes(id)) {
+        favPhrases = favPhrases.filter(item => item !== id);
+      } else {
+        favPhrases.push(id);
+      }
+      localStorage.setItem("jp_fav_phrases", JSON.stringify(favPhrases));
+      renderPhrases();
+    }
+
+    function renderPhrases() {
+      const categories = ["전체", "⭐ 즐겨찾기", ...new Set(PHRASE_DATA.map(p => p.category))];
+      const catContainer = document.getElementById("phraseCategorySelector");
+
+      catContainer.innerHTML = categories.map(cat => `
+        <button onclick="selectPhraseCategory('${cat}')" class="shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition border ${
+          selectedPhraseCategory === cat
+            ? "bg-indigo-600 text-white border-indigo-600"
+            : "bg-slate-50 text-slate-600 border-slate-200"
+        }">${cat}</button>
+      `).join("");
+
+      const filtered = getFilteredPhrases();
+      const listContainer = document.getElementById("phraseListContainer");
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div class="bg-white rounded-2xl p-8 text-center border border-slate-200/80 text-slate-400 text-sm font-semibold">
+            즐겨찾기한 회화 문장이 없습니다. 별(⭐) 아이콘을 눌러 자주 쓰는 문장을 담아보세요!
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = filtered.map(item => {
+        const isFav = favPhrases.includes(item.id);
+        const isPlayingThis = currentLoopItem && currentLoopItem.id === item.id;
+
+        return `
+          <div onclick="playPhraseLoop(PHRASE_DATA.find(p => p.id === '${item.id}'))" class="bg-white rounded-2xl p-4 shadow-sm border ${
+            isPlayingThis ? 'border-2 border-indigo-600 ring-2 ring-indigo-100 bg-indigo-50/20' : 'border-slate-200/80 hover:border-indigo-300'
+          } active:scale-[0.99] transition cursor-pointer flex items-center justify-between gap-3">
+            <div class="space-y-1 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="inline-block px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-600">${item.category}</span>
+                <button onclick="toggleFavPhrase(event, '${item.id}')" class="text-base leading-none">${isFav ? '⭐' : '☆'}</button>
+                ${isPlayingThis ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-600 text-white playing-pulse">반복 재생 중</span>' : ''}
+              </div>
+              <p class="jp-font text-lg font-extrabold text-slate-800">${item.jp}</p>
+              <p class="text-xs font-semibold text-indigo-600 ${blindPron ? 'blur-secret' : ''}">${item.pron}</p>
+              <p class="text-sm font-bold text-slate-600 ${blindKr ? 'blur-secret' : ''}">${item.kr}</p>
+            </div>
+            <div class="shrink-0 flex items-center gap-1.5">
+              <button onclick="event.stopPropagation(); playPhraseLoop(PHRASE_DATA.find(p => p.id === '${item.id}'))" class="w-11 h-11 rounded-2xl ${
+                isPlayingThis ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600'
+              } flex items-center justify-center transition">
+                ${isPlayingThis ? `
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <rect x="6" y="5" width="4" height="14" rx="1.5" />
+                    <rect x="14" y="5" width="4" height="14" rx="1.5" />
+                  </svg>
+                ` : `
+                  <svg class="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                `}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function selectPhraseCategory(cat) {
+      stopAnyPhraseLoop();
+      selectedPhraseCategory = cat;
+      renderPhrases();
+    }
+
+    // =====================================================
+    // 5. 50음도 퀴즈 & 진급 로직 (기존 완성 기능 유지)
+    // =====================================================
+    function toggleIncludeDakuon() {
+      includeDakuon = !includeDakuon;
+      const btn = document.getElementById("toggleDakuonBtn");
+      if (includeDakuon) {
+        btn.textContent = "+ 탁음/반탁음 ON";
+        btn.className = "px-2.5 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-600 font-bold transition";
+      } else {
+        btn.textContent = "+ 탁음/반탁음 OFF";
+        btn.className = "px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 font-bold transition";
+        if (DAKUON_DATA.some(r => r.rowId === selectedRowId)) {
+          selectedRowId = "a";
+          rowCorrectCount = 0;
+        }
+      }
+      renderRowSelector();
+      renderKanaChart();
+      generateQuestion();
+    }
+
+    function renderRowSelector() {
+      const container = document.getElementById("rowSelector");
+      const activeList = getActiveKanaList();
+
+      const allBtnHtml = `
+        <button onclick="selectRow('all')" class="shrink-0 px-3.5 py-2 rounded-xl text-xs font-extrabold transition border ${
+          selectedRowId === "all"
+            ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+            : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+        }">전체 행 (랜덤)</button>
+      `;
+
+      const rowBtnsHtml = activeList.map(row => {
+        const active = selectedRowId === row.rowId;
+        const isCleared = clearedRows.includes(row.rowId);
+        const sampleChar = currentScript === "hiragana" ? row.items[0].h : row.items[0].k;
+        return `
+          <button onclick="selectRow('${row.rowId}')" class="shrink-0 px-3.5 py-2 rounded-xl text-xs font-extrabold transition border flex items-center gap-1 ${
+            active
+              ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+              : isCleared
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+              : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+          }">
+            <span>${row.rowName} (${sampleChar})</span>
+            ${isCleared ? '<span>✅</span>' : ''}
+          </button>
+        `;
+      }).join("");
+
+      container.innerHTML = allBtnHtml + rowBtnsHtml;
+      updateStageProgressBar();
+    }
+
+    function updateStageProgressBar() {
+      const activeList = getActiveKanaList();
+      const rowObj = activeList.find(r => r.rowId === selectedRowId);
+      const labelEl = document.getElementById("currentRowNameLabel");
+      const countEl = document.getElementById("rowStepCount");
+      const barEl = document.getElementById("rowProgressBar");
+
+      if (selectedRowId === "all") {
+        labelEl.textContent = "전체 행 랜덤";
+      } else if (rowObj) {
+        labelEl.textContent = rowObj.rowName;
+      }
+
+      countEl.textContent = rowCorrectCount;
+      const pct = Math.min(100, Math.round((rowCorrectCount / TARGET_QUESTIONS_PER_ROW) * 100));
+      barEl.style.width = `${pct}%`;
+    }
+
+    function selectRow(rowId) {
+      selectedRowId = rowId;
+      rowCorrectCount = 0;
+      renderRowSelector();
+      generateQuestion();
+    }
+
+    function setScriptMode(mode) {
+      currentScript = mode;
+      const hBtn = document.getElementById("modeHiraganaBtn");
+      const kBtn = document.getElementById("modeKatakanaBtn");
+      if (mode === "hiragana") {
+        hBtn.className = "flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs sm:text-sm font-extrabold bg-white text-indigo-600 shadow-sm transition";
+        kBtn.className = "flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs sm:text-sm font-extrabold text-slate-600 transition";
+      } else {
+        kBtn.className = "flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs sm:text-sm font-extrabold bg-white text-indigo-600 shadow-sm transition";
+        hBtn.className = "flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs sm:text-sm font-extrabold text-slate-600 transition";
+      }
+      renderRowSelector();
+      generateQuestion();
+    }
+
+    function generateQuestion() {
+      isLocked = false;
+      const feedbackEl = document.getElementById("quizFeedback");
+      feedbackEl.textContent = "";
+
+      const activeList = getActiveKanaList();
+
+      if (selectedRowId === "all") {
+        currentRowObj = activeList[Math.floor(Math.random() * activeList.length)];
+      } else {
+        currentRowObj = activeList.find(r => r.rowId === selectedRowId) || activeList[0];
+      }
+
+      const candidates = currentRowObj.items.length > 1 && currentQuestion
+        ? currentRowObj.items.filter(item => item.h !== currentQuestion.h)
+        : currentRowObj.items;
+
+      currentQuestion = candidates[Math.floor(Math.random() * candidates.length)];
+      const sameRowOptions = shuffleArray(currentRowObj.items);
+
+      const firstChar = currentScript === "hiragana" ? currentRowObj.items[0].h : currentRowObj.items[0].k;
+      document.getElementById("quizRowBadge").textContent = `${currentRowObj.rowName} (${firstChar}행) 보기만 출제 중`;
+
+      const displayChar = currentScript === "hiragana" ? currentQuestion.h : currentQuestion.k;
+      document.getElementById("quizCharacter").textContent = displayChar;
+      document.getElementById("canvasGuideChar").textContent = displayChar;
+      clearCanvas();
+
+      const optionsContainer = document.getElementById("quizOptions");
+      optionsContainer.className = `grid grid-cols-1 sm:grid-cols-${sameRowOptions.length} gap-2.5 max-w-2xl mx-auto`;
+
+      optionsContainer.innerHTML = sameRowOptions.map(opt => `
+        <button
+          onclick="checkAnswer('${opt.h}', this)"
+          class="option-btn w-full py-4 px-3 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 active:scale-95 transition flex sm:flex-col items-center justify-between sm:justify-center gap-1 font-extrabold text-slate-800"
+        >
+          <span class="text-xl">${opt.r}</span>
+          <span class="text-xs font-semibold text-slate-400 uppercase">${opt.romaji}</span>
+        </button>
+      `).join("");
+    }
+
+    function speakCurrentQuestion() {
+      if (currentQuestion) {
+        speakJapanese(currentQuestion.h);
+      }
+    }
+
+    function checkAnswer(selectedHiragana, btnElement) {
+      if (isLocked || !currentQuestion) return;
+
+      const feedbackEl = document.getElementById("quizFeedback");
+
+      if (selectedHiragana === currentQuestion.h) {
+        isLocked = true;
+        scoreCorrect++;
+        scoreStreak++;
+        rowCorrectCount++;
+
+        document.getElementById("scoreCorrect").textContent = scoreCorrect;
+        document.getElementById("scoreStreak").textContent = scoreStreak;
+        updateStageProgressBar();
+
+        btnElement.className = "option-btn w-full py-4 px-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500 text-white transition flex sm:flex-col items-center justify-between sm:justify-center gap-1 font-extrabold shadow-md";
+        feedbackEl.className = "min-h-[28px] text-sm sm:text-base font-extrabold mb-4 text-emerald-600";
+        feedbackEl.textContent = `⭕ 정답입니다! (${currentQuestion.r} / ${currentQuestion.romaji}) 🔊`;
+
+        speakJapanese(currentQuestion.h);
+
+        if (rowCorrectCount >= TARGET_QUESTIONS_PER_ROW) {
+          setTimeout(() => {
+            handleStageClear();
+          }, 850);
+        } else {
+          setTimeout(() => {
+            generateQuestion();
+          }, 900);
+        }
+      } else {
+        scoreStreak = 0;
+        document.getElementById("scoreStreak").textContent = scoreStreak;
+
+        btnElement.className = "option-btn w-full py-4 px-3 rounded-2xl border-2 border-rose-400 bg-rose-50 text-rose-600 transition flex sm:flex-col items-center justify-between sm:justify-center gap-1 font-extrabold";
+        feedbackEl.className = "min-h-[28px] text-sm sm:text-base font-extrabold mb-4 text-rose-600";
+        feedbackEl.textContent = "❌ 아쉬워요! 같은 행의 다른 발음을 골라보세요!";
+
+        addWeakChar(currentQuestion, currentRowObj.rowId, currentRowObj.rowName);
+      }
+    }
+
+    function handleStageClear() {
+      const activeList = getActiveKanaList();
+
+      if (selectedRowId !== "all" && !clearedRows.includes(selectedRowId)) {
+        clearedRows.push(selectedRowId);
+        localStorage.setItem("jp_cleared_rows", JSON.stringify(clearedRows));
+      }
+
+      const currentIndex = activeList.findIndex(r => r.rowId === selectedRowId);
+      const modal = document.getElementById("stageClearModal");
+      const titleEl = document.getElementById("modalClearTitle");
+      const descEl = document.getElementById("modalClearDesc");
+      const nextBtn = document.getElementById("modalNextRowBtn");
+
+      if (selectedRowId !== "all" && currentIndex !== -1 && currentIndex + 1 < activeList.length) {
+        const nextRow = activeList[currentIndex + 1];
+        nextRowIdToAdvance = nextRow.rowId;
+        titleEl.textContent = `${activeList[currentIndex].rowName} 10문제 마스터!`;
+        descEl.innerHTML = `축하합니다! 10문제를 모두 맞혀 다음 단계인 <strong class="text-indigo-600">${nextRow.rowName}</strong>으로 진급합니다.`;
+        nextBtn.textContent = `${nextRow.rowName} 시작하기 →`;
+      } else {
+        nextRowIdToAdvance = "all";
+        titleEl.textContent = `전 단계 완벽 마스터! 🏆`;
+        descEl.innerHTML = `마지막 행까지 10문제를 모두 정복했어요! 이제 <strong class="text-indigo-600">전체 행 (랜덤)</strong> 모드로 실력을 다져보세요.`;
+        nextBtn.textContent = `전체 행 랜덤 시작하기 →`;
+      }
+
+      renderRowSelector();
+      renderKanaChart();
+      modal.classList.remove("hidden");
+    }
+
+    function advanceToNextRowNow() {
+      document.getElementById("stageClearModal").classList.add("hidden");
+      if (nextRowIdToAdvance) {
+        selectRow(nextRowIdToAdvance);
+      }
+    }
+
+    function stayInCurrentRow() {
+      document.getElementById("stageClearModal").classList.add("hidden");
+      rowCorrectCount = 0;
+      updateStageProgressBar();
+      generateQuestion();
+    }
+
+    function resetAllProgress() {
+      clearedRows = [];
+      rowCorrectCount = 0;
+      scoreCorrect = 0;
+      scoreStreak = 0;
+      localStorage.removeItem("jp_cleared_rows");
+      document.getElementById("scoreCorrect").textContent = "0";
+      document.getElementById("scoreStreak").textContent = "0";
+      selectRow("a");
+      renderKanaChart();
+    }
+
+    // =====================================================
+    // 6. 오답 노트
+    // =====================================================
+    function addWeakChar(item, rowId, rowName) {
+      if (!weakChars.some(w => w.h === item.h)) {
+        weakChars.unshift({ ...item, rowId, rowName });
+        if (weakChars.length > 15) weakChars.pop();
+        localStorage.setItem("jp_weak_chars", JSON.stringify(weakChars));
+        renderWeakNotes();
+      }
+    }
+
+    function renderWeakNotes() {
+      const container = document.getElementById("weakListContainer");
+      const badge = document.getElementById("weakCountBadge");
+      badge.textContent = weakChars.length;
+
+      if (weakChars.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-1">아직 틀린 글자가 없습니다. 퀴즈를 풀다 틀린 글자가 여기에 자동 기록됩니다.</p>`;
+        return;
+      }
+
+      container.innerHTML = weakChars.map(item => `
+        <button onclick="reviewWeakItem('${item.h}', '${item.rowId}')" class="px-3 py-1.5 rounded-xl bg-rose-50/70 hover:bg-rose-100 border border-rose-200 flex items-center gap-1.5 transition active:scale-95">
+          <span class="jp-font text-base font-black text-rose-700">${currentScript === 'hiragana' ? item.h : item.k}</span>
+          <span class="text-xs font-extrabold text-slate-700">${item.r}</span>
+          <span class="text-[10px] font-semibold text-slate-400">(${item.rowName})</span>
+        </button>
+      `).join("");
+    }
+
+    function reviewWeakItem(hiragana, rowId) {
+      speakJapanese(hiragana);
+      selectRow(rowId);
+    }
+
+    function clearWeakNotes() {
+      weakChars = [];
+      localStorage.removeItem("jp_weak_chars");
+      renderWeakNotes();
+    }
+
+    // =====================================================
+    // 7. 손글씨 따라쓰기 미니 캔버스
+    // =====================================================
+    let canvas, ctx, isDrawing = false;
+
+    function initCanvas() {
+      canvas = document.getElementById("writeCanvas");
+      if (!canvas) return;
+      ctx = canvas.getContext("2d");
+      ctx.lineWidth = 5;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#4f46e5";
+
+      const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: (clientX - rect.left) * (canvas.width / rect.width),
+          y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+      };
+
+      const startDraw = (e) => {
+        e.preventDefault();
+        isDrawing = true;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      };
+
+      const moveDraw = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      };
+
+      const endDraw = () => {
+        isDrawing = false;
+      };
+
+      canvas.addEventListener("mousedown", startDraw);
+      canvas.addEventListener("mousemove", moveDraw);
+      window.addEventListener("mouseup", endDraw);
+
+      canvas.addEventListener("touchstart", startDraw, { passive: false });
+      canvas.addEventListener("touchmove", moveDraw, { passive: false });
+      window.addEventListener("touchend", endDraw);
+    }
+
+    function clearCanvas() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function toggleDrawingPad() {
+      const pad = document.getElementById("drawingPadContainer");
+      const btn = document.getElementById("toggleDrawBtn");
+      const isHidden = pad.classList.contains("hidden");
+      if (isHidden) {
+        pad.classList.remove("hidden");
+        pad.classList.add("flex");
+        btn.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold bg-indigo-600 text-white border border-indigo-600 transition";
+        clearCanvas();
+      } else {
+        pad.classList.add("hidden");
+        pad.classList.remove("flex");
+        btn.className = "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 transition";
+      }
+    }
+
+    // =====================================================
+    // 8. 50음도표
+    // =====================================================
+    function renderKanaChart() {
+      const container = document.getElementById("kanaChartContainer");
+      const allData = [...SEION_DATA, ...DAKUON_DATA];
+
+      container.innerHTML = allData.map(row => {
+        const isCleared = clearedRows.includes(row.rowId);
+        return `
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-extrabold text-indigo-600">${row.rowName}</span>
+                ${isCleared ? '<span class="px-2 py-0.5 text-[11px] font-extrabold rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">✅ 마스터 완료</span>' : ''}
+              </div>
+              <button onclick="startRowQuizFromChart('${row.rowId}')" class="text-xs font-bold text-slate-500 hover:text-indigo-600">이 행 10문제 도전 →</button>
+            </div>
+            <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              ${row.items.map(item => `
+                <button onclick="speakJapanese('${item.h}')" class="p-3 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200/80 active:scale-95 transition text-center">
+                  <div class="jp-font text-2xl font-black text-slate-800">${item.h} <span class="text-slate-400 font-bold text-lg">/ ${item.k}</span></div>
+                  <div class="text-xs font-bold text-indigo-600 mt-1">${item.r} <span class="text-slate-400 font-normal">(${item.romaji})</span></div>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function startRowQuizFromChart(rowId) {
+      if (DAKUON_DATA.some(r => r.rowId === rowId) && !includeDakuon) {
+        toggleIncludeDakuon();
+      }
+      selectRow(rowId);
+      switchTab("quiz");
+    }
+
+    // =====================================================
+    // 9. 하단 탭 전환
+    // =====================================================
+    function switchTab(tabName) {
+      if (tabName !== "phrases") {
+        stopAnyPhraseLoop(); // 회화 탭을 벗어나면 반복 재생 자동 중단
+      }
+
+      ["quiz", "chart", "phrases"].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle("hidden", t !== tabName);
+        const navBtn = document.getElementById(`nav-${t}`);
+        if (t === tabName) {
+          navBtn.className = "flex flex-col items-center py-1.5 rounded-xl text-indigo-600 font-extrabold transition";
+        } else {
+          navBtn.className = "flex flex-col items-center py-1.5 rounded-xl text-slate-400 font-extrabold transition";
+        }
+      });
+    }
+
+    // 초기 실행
+    window.addEventListener("DOMContentLoaded", () => {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.getVoices();
+      }
+      initCanvas();
+      renderRowSelector();
+      generateQuestion();
+      renderWeakNotes();
+      renderKanaChart();
+      renderPhrases();
+      setPhraseRepeatCount(3); // 기본 3회 반복 세팅
     });
-    if (ok) { score += 10; streak++; document.getElementById('fb-title').textContent = '정답입니다! 🎉'; }
-    else { streak = 0; document.getElementById('fb-title').textContent = `오답! 정답은 '${curQ.ko}' 입니다.`; }
-    document.getElementById('q-score').textContent = score;
-    document.getElementById('q-streak').textContent = streak;
-    document.getElementById('fb-sub').textContent = `${curQ.hira}/${curQ.kata} (${curQ.ko}) · ${curQ.word}`;
-    document.getElementById('q-feedback').classList.remove('hidden');
-}
-
-function renderPhrases() {
-    document.getElementById('phrase-list').innerHTML = phrases.map(p =>
-        `<div class="phrase-card" onclick="speak('${p.jp}')">
-            <div><div class="phrase-jp">${p.jp}</div><div class="phrase-pron">${p.pron}</div><div class="phrase-ko">${p.ko}</div></div>
-            <div style="font-size:24px;">🔊</div>
-        </div>`
-    ).join('');
-}
-
-renderCRows(); renderGrid(); renderQRows(); renderPhrases(); nextQ();
-</script>
+  </script>
 </body>
 </html>
